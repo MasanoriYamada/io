@@ -1,0 +1,44 @@
+brief: calc jack knefie
+available data type: int array, float array, double array, complex<double> array, 
+but complex is only used real part
+
+データタイプは自動で合わせてくれる
+複素数型は自動的に実部のみを取り出して計算で利用する。
+binの平均を取った状態のデータからの計算も可能
+
+How to use
+・class JACKのオブジェクトを作る
+confsize, binsize Datasizeの設定を行う。
+以下のメンバ関数を利用
+.set(confsie, binsize, datasize);  //デフォルトは全て0
+・データの入力
+setData(std::complex<double>* in, int iconf)    //raw data  
+void setBinData(std::complex<double>* in, int iconf);    //bin data
+・計算を実行して結果の先頭ポインタを返す。
+calcAve(); //平均を計算 返り値はdouble*
+calcErr(); //エラーを計算 返り値はdouble*
+
+※ 入力はテンプレートを利用しているのでどんな型でも使用可能
+
+
+
+
+
+ラベルの意味
+confsize : 統計の数
+binsize  : ビンの大きさ
+datasize : 入力データの数
+
+in	 : 入力データの先頭ポインタ
+iconf	 : 統計のインデックス
+
+
+
+
+個人用メモ
+complex のみ顕にかき、後はテンプレートを使った。
+デバッグ済(int double complex <double>) 多分complex <int float>は動かない
+.real()などを使っているからこれはテンプレでは実装できなかった
+confsize binsizeがコンストラクタから変更を受けていなければ、エラーを返す
+
+デバッグようのメンバ関数を作るといいかも

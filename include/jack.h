@@ -10,28 +10,31 @@
 #ifndef JACK_CALC_YAMADA_20130613
 #define JACK_CALC_YAMADA_20130613
 
+#include<iostream>
 #include<complex>
 #include<memory.h>
 
 class JACK{
  public:
-  JACK(int confSize, int binsize, int DataSize);
+  JACK();
   ~JACK();
-    double* calcAve();
-    double* calcErr();
-    void aveErr(double* ave,double* err);
+  void		set(int confSize, int binsize, int DataSize);
+  double*	calcAve();
+  double*	calcErr();
+  void		aveErr(double* ave,double* err);
  private:
-  void makeBin();
-  void jackAveCalc();
-  void jackErrCalc();
-  
+  void		makeBin();
+  void		jackAveCalc();
+  void		jackErrCalc();
+  void		checkErr();
+
  public:
   template <typename DATA>
-    void setData(DATA in, int iconf);
-  void setData(std::complex<double>* in, int iconf);
+    void	setData(DATA in, int iconf);
+  void		setData(std::complex<double>* in, int iconf);
   template <typename DATA>
-    void setBinData(DATA in, int iconf);
-  void setBinData(std::complex<double>* in, int iconf);
+    void	setBinData(DATA in, int iconf);
+  void		setBinData(std::complex<double>* in, int iconf);
  private:
   inline double confData(int id, int j){
     return ConfData[(id) + dataSize *(j)];
@@ -45,7 +48,6 @@ class JACK{
   double* ConfData;
   double* BinData;
   double* DoubleBinData;
-  double* doubleAve;
   double* ave_;
   double* err_;
   double* doubleAve_;
@@ -57,18 +59,11 @@ class JACK{
 
 };
 //constracta
-JACK::JACK(int confSize, int BinSize, int DataSize){
-  binsize = BinSize;
-  Confsize = confSize;
-  dataSize = DataSize;
-  binnumber = confSize/binsize;
-
-  ConfData = new double[Confsize*dataSize]();
-  BinData = new double[binnumber*dataSize]();
-  DoubleBinData = new double[binnumber*dataSize]();
-  doubleAve_ = new double[dataSize]();
-  ave_ = new double[dataSize]();
-  err_ = new double[dataSize]();
+JACK::JACK(){
+  binsize   = 0;
+  Confsize  = 0;
+  dataSize  = 0;
+  binnumber = 0;
 }
 //destracta
 JACK::~JACK(){
@@ -79,6 +74,20 @@ JACK::~JACK(){
   delete [] ave_;
   delete [] err_;
 }
+
+void JACK::set(int confSize, int BinSize, int DataSize){
+  binsize	= BinSize;
+  Confsize	= confSize;
+  dataSize	= DataSize;
+  binnumber	= confSize/binsize;
+  ConfData	= new double[Confsize*dataSize]();
+  BinData	= new double[binnumber*dataSize]();
+  DoubleBinData = new double[binnumber*dataSize]();
+  doubleAve_	= new double[dataSize]();
+  ave_		= new double[dataSize]();
+  err_		= new double[dataSize]();
+}
+
 double* JACK::calcAve(){
   jackAveCalc();
   return ave_;
@@ -93,6 +102,7 @@ void JACK::aveErr(double* Ave, double* Err){
   Err = calcErr();
 }
 template <typename DATA>     void JACK::setData(DATA in, int iconf){
+  checkErr();
   double* tmp =new double[dataSize]();
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id];
@@ -103,6 +113,7 @@ template <typename DATA>     void JACK::setData(DATA in, int iconf){
 }
 
 void JACK::setData(std::complex<double>* in, int iconf){
+  checkErr();
   double* tmp = new double[dataSize]();
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id].real();
@@ -112,6 +123,7 @@ void JACK::setData(std::complex<double>* in, int iconf){
   makeBin();
 }
 template <typename DATA>     void JACK::setBinData(DATA in, int iconf){
+  checkErr();
   double* tmp = new double[dataSize]();
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id];
@@ -121,7 +133,8 @@ template <typename DATA>     void JACK::setBinData(DATA in, int iconf){
 }
 
 void JACK::setBinData(std::complex<double>* in, int iconf){
-  double* tmp =new double[dataSize]();
+  checkErr();
+  double*	tmp = new double[dataSize]();
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id].real();
 }
@@ -131,7 +144,7 @@ void JACK::setBinData(std::complex<double>* in, int iconf){
 
 void JACK::makeBin(){
   for(int id = 0; id<dataSize; id++){
-    double full=0.0;
+    double	full = 0.0;
     for (int j=0; j<Confsize; j++) {
       full=full+confData(id,j);
     }
@@ -149,7 +162,7 @@ void JACK::makeBin(){
 void JACK::jackAveCalc(){
   for(int id = 0; id<dataSize; id++){
     
-    double buffer=0.0;
+    double	buffer = 0.0;
     for (int b=0; b<binnumber; b++) {
       buffer = buffer+binData(id,b);
     }
@@ -158,7 +171,7 @@ void JACK::jackAveCalc(){
       DoubleBinData[id + dataSize *b] = binData(id,b)*binData(id,b);
     }
 
-    double buffer1 = 0.0;
+    double	buffer1 = 0.0;
     for (int b=0; b<binnumber; b++) {
       buffer1 = buffer1+doubleBinData(id,b);
     }
@@ -167,8 +180,15 @@ void JACK::jackAveCalc(){
 }
 void JACK::jackErrCalc(){
   for(int id = 0; id<dataSize; id++){
-    err_[id]= sqrt(((double)binnumber -1.0)*((doubleAve_[id])-(ave_[id])*(ave_[id])));
+    err_[id] = sqrt(((double)binnumber -1.0)*((doubleAve_[id])-(ave_[id])*(ave_[id])));
   }
 }
+void JACK::checkErr(){
+  if(  binsize == 0 || Confsize==0 || dataSize==0)
+    {
+      std::cout <<"ERR set jack info by using set(int confSize, int binsize, int DataSize); "<<std::endl;
+    }
+}
+
 
 #endif
