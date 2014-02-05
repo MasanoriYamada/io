@@ -30,10 +30,10 @@ class JACK{
 
  public:
   template <typename DATA>
-    void	setData(DATA in, int iconf);
+  void	setData(DATA in, int iconf);
   void		setData(std::complex<double>* in, int iconf);
   template <typename DATA>
-    void	setBinData(DATA in, int iconf);
+  void	setBinData(DATA in, int iconf);
   void		setBinData(std::complex<double>* in, int iconf);
  private:
   inline double confData(int id, int j){
@@ -51,6 +51,7 @@ class JACK{
   double* ave_;
   double* err_;
   double* doubleAve_;
+  bool aveInit_;
 
   int Confsize;
   int binsize;
@@ -64,15 +65,16 @@ JACK::JACK(){
   Confsize  = 0;
   dataSize  = 0;
   binnumber = 0;
+  aveInit_ = false;
 }
 //destracta
 JACK::~JACK(){
-  delete [] DoubleBinData;
-  delete [] doubleAve_;
-  delete [] BinData;
-  delete [] ConfData;
-  delete [] ave_;
-  delete [] err_;
+  delete [] DoubleBinData; DoubleBinData = NULL;
+  delete [] doubleAve_; doubleAve_ = NULL;
+  delete [] BinData; BinData = NULL;
+  delete [] ConfData; ConfData = NULL;
+  delete [] ave_; ave_ = NULL;
+  delete [] err_; err_ = NULL;
 }
 
 void JACK::set(int confSize, int BinSize, int DataSize){
@@ -93,7 +95,7 @@ double* JACK::calcAve(){
   return ave_;
 }
 double* JACK::calcErr(){
-  jackAveCalc();
+  if(!aveInit_) jackAveCalc();
   jackErrCalc();
   return err_;
 }
@@ -109,7 +111,7 @@ template <typename DATA>     void JACK::setData(DATA in, int iconf){
 }
   memcpy(ConfData + iconf*dataSize,tmp,sizeof(tmp) * dataSize);
   delete[] tmp;
-  makeBin();
+  if(Confsize ==iconf + 1)  makeBin();
 }
 
 void JACK::setData(std::complex<double>* in, int iconf){
@@ -120,7 +122,7 @@ void JACK::setData(std::complex<double>* in, int iconf){
 }
   memcpy(ConfData + iconf*dataSize,tmp,sizeof(tmp)*dataSize);
   delete [] tmp;
-  makeBin();
+  if(Confsize ==iconf + 1)  makeBin();
 }
 template <typename DATA>     void JACK::setBinData(DATA in, int iconf){
   checkErr();
@@ -177,6 +179,7 @@ void JACK::jackAveCalc(){
     }
     doubleAve_[id] = buffer1/(double)binnumber;
   }
+  aveInit_ = true;
 }
 void JACK::jackErrCalc(){
   for(int id = 0; id<dataSize; id++){
