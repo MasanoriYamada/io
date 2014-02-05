@@ -19,36 +19,29 @@ typedef complex<double> COMPLEX;
 
 
 
-static const int T_in=9;
-static const int T_fi=9;
+static const int T_in=7;
+static const int T_fi=7;
 static const int XnodeSites =16;
 static const int YnodeSites =16;
 static const int ZnodeSites =16;
 static const int TnodeSites =32/2;
 static const int binsize=1;
 static const int Confsize=700;
-static const int Tshiftsize=1;
-static const double ascale = 0.1209;
-static const double hbarc = 197.327;
-static const double ToMev = hbarc/ascale;
 static const int binnumber = Confsize / binsize;
-static const int XYZnodeSites = XnodeSites*YnodeSites*ZnodeSites;
+static const int DataSize = XnodeSites*YnodeSites*ZnodeSites;
 //set in out info
 
-std::string inPath = "/Users/SINYAMADA/lab/data/results/bin1/Potential/binPotential/xyz";
-std::string outPath = "../out";
-std::string physInfo = "RC16x32_B1830Kud013760Ks013710C17610.kap_013710";
-std::string inStaticsInfo = "Potential";
-std::string outStaticsInfo = "param";
+std::string inPath = "../debug/in";
+std::string outPath = "../debug/out";
+std::string physInfo = "RC16x32_B1830Kud013760Ks013710C17610";
+std::string inStaticsInfo = "OmgOmgwave";
+std::string outStaticsInfo = "jack";
+
 bool inBinary = true;
 bool outBinary = false;
 
-
-inline void reScale(COMPLEX* pot){
-    for(int id = 0; id < XYZnodeSites; id++){
-        pot[id] = ToMev*pot[id];
-    }
-}
+#define radius(x,y,z) sqrt(((x)*(x) + (y)*(y) + (z)*(z)))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
 
 
 int main(){
@@ -58,31 +51,40 @@ int main(){
   IODATA inPot;
   inPot.setReadBinaryMode(inBinary);
   inPot.setWriteBinaryMode(outBinary);
-  inPot.setConfSize(binnumber);
+  inPot.setConfSize(Confsize);
 
+  double* xdata = new double[DataSize]();
+
+  for(int ix =0; ix<XnodeSites; ix++){
+    for(int iy =0; iy<YnodeSites; iy++){
+      for(int iz =0; iz<ZnodeSites; iz++){
+	xdata[ix+XnodeSites*(iy+YnodeSites*iz)] = radius( min(ix,XnodeSites-ix), min(iy,YnodeSites-iy), min(iz,ZnodeSites-iz) );;
+      }
+    }
+  }
 
   for(int iT=T_in  ; iT< T_fi +1  ; iT++ ){
     JACK jackPot;
-    jackPot.set(Confsize, binsize, XYZnodeSites);
-    COMPLEX* binPot = new COMPLEX[XYZnodeSites*binnumber];
-    for (int iconf=0; iconf< binnumber; iconf++) {
-      COMPLEX* pot = new COMPLEX[XYZnodeSites];
-      inPot.callData(pot,1,inPath,inStaticsInfo,physInfo,iconf,iT);
-      reScale(pot);
-	    memcpy(binPot + iconf*XYZnodeSites, pot, sizeof(pot)*XYZnodeSites*2);    
-	               if(iconf == 0){      for(int ixyz = 0;ixyz<XYZnodeSites;ixyz++){ cout<<iconf<<" "<<ixyz<<" "<<pot[ixyz]<<endl;}}
-      jackPot.setBinData(pot,iconf);
-      delete [] pot;
+    jackPot.set(Confsize, binsize, DataSize);
+    for (int iconf=0; iconf< Confsize; iconf++) {
+      COMPLEX* ydata = new COMPLEX[DataSize];
+      inPot.callData(ydata,1,inPath,inStaticsInfo,physInfo,iconf,iT);
+	               if(iconf == 0){      for(int ixyz = 0;ixyz<DataSize;ixyz++){ cout<<iconf<<" "<<ixyz<<" "<<ydata[ixyz]<<endl;}}
+      jackPot.setData(ydata,iconf);
+      delete [] ydata;
     }
     
-    double* err= new double[XYZnodeSites]; 
-    double* ave= new double[XYZnodeSites]; 
-        err= jackPot.calcErr();
-	ave= jackPot.calcAve();
+    double* err= new double[DataSize]; 
+    double* ave= new double[DataSize]; 
+        jackPot.calcErr(err);
+	jackPot.calcAve(ave);
 	//    jackPot.aveErr(ave,err);
-        for(int ixyz = 0;ixyz<XYZnodeSites;ixyz++){cout<<"ave "<<ixyz<<" "<<ave[ixyz]<<" err "<<err[ixyz]<<endl;}
-	//     inPot.outErr(ave,err,outPath,outStaticsInfo,physInfo,700,iT,XYZnodeSites);
+        for(int ixyz = 0;ixyz<DataSize;ixyz++){cout<<"ave "<<ixyz<<" "<<ave[ixyz]<<" err "<<err[ixyz]<<endl;}
+	inPot.outErr(xdata,ave,err,outPath,outStaticsInfo,physInfo,binnumber,iT,DataSize);
+	delete [] err;
+	delete [] ave;
   }//It
+  delete [] xdata;
 cout <<"@End all jobs"<<endl; 
 return 0;
 }

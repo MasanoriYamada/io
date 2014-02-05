@@ -19,10 +19,10 @@ class JACK{
   JACK();
   ~JACK();
   void		set(int confSize, int binsize, int DataSize);
-  double*	calcAve();
-  double*	calcErr();
+  void	calcAve(double* );
+  void	calcErr(double* );
   void		aveErr(double* ave,double* err);
- private:
+private:
   void		makeBin();
   void		jackAveCalc();
   void		jackErrCalc();
@@ -90,18 +90,18 @@ void JACK::set(int confSize, int BinSize, int DataSize){
   err_		= new double[dataSize]();
 }
 
-double* JACK::calcAve(){
+void JACK::calcAve(double* out_ave){
   jackAveCalc();
-  return ave_;
+  memcpy(out_ave,ave_,sizeof(ave_) * dataSize);
 }
-double* JACK::calcErr(){
+void JACK::calcErr(double* out_err){
   if(!aveInit_) jackAveCalc();
   jackErrCalc();
-  return err_;
+  memcpy(out_err,err_,sizeof(err_) * dataSize);
 }
 void JACK::aveErr(double* Ave, double* Err){
-  Ave = calcAve();
-  Err = calcErr();
+  calcAve(Ave);
+  calcErr(Err);
 }
 template <typename DATA>     void JACK::setData(DATA in, int iconf){
   checkErr();

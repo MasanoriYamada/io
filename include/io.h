@@ -36,10 +36,10 @@ void setD(std::string dim);
   template<typename DATA> int readData(DATA in ,char* inFileName);
   int readData(std::complex<double>* data ,char* inFileName);   //In text mode, complex<double> a.real() a.imag() <==can read ! ||| complex<double> (real,imag) <==type data can't read
   template<typename DATA> int writeData(DATA out,char* outFileName);
-  template<typename DATA> int writeData1D(DATA xd, DATA ave,DATA err,char* outFileName);
+  template<typename XDATA ,typename DATA> int writeData1D(XDATA xd, DATA ave,DATA err,char* outFileName);
   template<typename DATA> int writeData3D(DATA ave,DATA err,char* outFileName);
     int writeData(std::complex<double>* data,char* outFileName);
-    int writeData1D(double* xd, std::complex<double>* ave,std::complex<double>* err,char* outFileName);
+  template<typename DATA> int writeData1D(DATA xd, std::complex<double>* ave,std::complex<double>* err,char* outFileName);
     int writeData3D( std::complex<double>* ave,std::complex<double>* err,char* outFileName);
     void checkConfsize();
     
@@ -91,7 +91,7 @@ void IODATA::checkConfsize(){
 template<typename DATA> void IODATA::callData(DATA in , int line, std::string inPath ,std::string staticInfo ,std::string physInfo , int iconf, int it){
   checkConfsize();
   line_ = line -1;
-  if(r_bSwitch_)sprintf(inFileName,"%s/%s.%06d-%06d.%s._it%02d",inPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
+  if(r_bSwitch_)sprintf(inFileName,"%s/%s.%06d-%06d.%s.it%02d",inPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
   else if(!r_bSwitch_)sprintf(inFileName,"%s/%s.%06d-%06d.%s.it%02d",inPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
   else {std::cerr << "ERROR binary swich is warang::"<<std::endl;
     exit(1);}
@@ -101,7 +101,7 @@ template<typename DATA> void IODATA::callData(DATA in , int line, std::string in
 template<typename DATA> void IODATA::outData(DATA out ,std::string outPath ,std::string staticInfo ,std::string physInfo ,int iconf ,int it,int arraySize){
   checkConfsize();
   dataSizeOut_ = arraySize;
-  if(w_bSwitch_)sprintf(outFileName,"%s/%s.%06d-%06d.%s.it%02d.bin",outPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
+  if(w_bSwitch_)sprintf(outFileName,"%s/%s.%06d-%06d.%s.it%02d",outPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
   else if(!w_bSwitch_)sprintf(outFileName,"%s/%s.%06d-%06d.%s.it%02d",outPath.c_str(),staticInfo.c_str(),binnumber_,iconf,physInfo.c_str(),it);
     else {std::cerr << "ERROR binary swich is warang::"<<std::endl;
       exit(1);}
@@ -334,7 +334,7 @@ int IODATA::writeData(std::complex<double>* data,char* outFileName)
 
 
 
-template<typename DATA> int IODATA::writeData1D(DATA xd ,DATA ave,DATA err,char* outFileName)
+template<typename XDATA ,typename DATA> int IODATA::writeData1D(XDATA xd ,DATA ave,DATA err,char* outFileName)
 {
   std::fstream ofs;
   if(w_bSwitch_){
@@ -360,7 +360,7 @@ template<typename DATA> int IODATA::writeData1D(DATA xd ,DATA ave,DATA err,char*
   return 0;
 }
 
-int IODATA::writeData1D(double* xd, std::complex<double>* ave,std::complex<double>* err,char* outFileName)
+template<typename DATA>int IODATA::writeData1D(DATA xd, std::complex<double>* ave,std::complex<double>* err,char* outFileName)
 {
   std::fstream ofs;
   if(w_bSwitch_){
