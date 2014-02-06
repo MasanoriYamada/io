@@ -92,12 +92,12 @@ void JACK::set(int confSize, int BinSize, int DataSize){
 
 void JACK::calcAve(double* out_ave){
   jackAveCalc();
-  memcpy(out_ave,ave_,sizeof(ave_) * dataSize);
+  memcpy(out_ave,ave_,sizeof(*ave_) * dataSize);
 }
 void JACK::calcErr(double* out_err){
   if(!aveInit_) jackAveCalc();
   jackErrCalc();
-  memcpy(out_err,err_,sizeof(err_) * dataSize);
+  memcpy(out_err,err_,sizeof(*err_) * dataSize);
 }
 void JACK::aveErr(double* Ave, double* Err){
   calcAve(Ave);
@@ -109,7 +109,7 @@ template <typename DATA>     void JACK::setData(DATA in, int iconf){
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id];
 }
-  memcpy(ConfData + iconf*dataSize,tmp,sizeof(tmp) * dataSize);
+  memcpy(ConfData + iconf*dataSize,tmp,sizeof(*tmp) * dataSize);
   delete[] tmp;
   if(Confsize ==iconf + 1)  makeBin();
 }
@@ -120,7 +120,7 @@ void JACK::setData(std::complex<double>* in, int iconf){
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id].real();
 }
-  memcpy(ConfData + iconf*dataSize,tmp,sizeof(tmp)*dataSize);
+  memcpy(ConfData + iconf*dataSize,tmp,sizeof(*tmp)*dataSize);
   delete [] tmp;
   if(Confsize ==iconf + 1)  makeBin();
 }
@@ -130,7 +130,7 @@ template <typename DATA>     void JACK::setBinData(DATA in, int iconf){
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id];
 }
-  memcpy(BinData + iconf*dataSize,tmp,sizeof(tmp)*dataSize);
+  memcpy(BinData + iconf*dataSize,tmp,sizeof(*tmp)*dataSize);
   delete[] tmp;
 }
 
@@ -140,7 +140,7 @@ void JACK::setBinData(std::complex<double>* in, int iconf){
   for(int id = 0; id <dataSize; id++){
     tmp[id] = (double)in[id].real();
 }
-  memcpy(BinData + iconf*dataSize,tmp,sizeof(tmp)*dataSize);
+  memcpy(BinData + iconf*dataSize,tmp,sizeof(*tmp)*dataSize);
   delete[] tmp;
 }
 

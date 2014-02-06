@@ -54,6 +54,8 @@ int main(){
   inPot.setConfSize(Confsize);
 
   double* xdata = new double[DataSize]();
+    double* err= new double[DataSize]; 
+    double* ave= new double[DataSize]; 
 
   for(int ix =0; ix<XnodeSites; ix++){
     for(int iy =0; iy<YnodeSites; iy++){
@@ -64,7 +66,8 @@ int main(){
   }
 
   for(int iT=T_in  ; iT< T_fi +1  ; iT++ ){
-    JACK jackPot;
+    {
+      JACK jackPot;
     jackPot.set(Confsize, binsize, DataSize);
     for (int iconf=0; iconf< Confsize; iconf++) {
       COMPLEX* ydata = new COMPLEX[DataSize];
@@ -74,17 +77,18 @@ int main(){
       delete [] ydata;
     }
     
-    double* err= new double[DataSize]; 
-    double* ave= new double[DataSize]; 
+
         jackPot.calcErr(err);
 	jackPot.calcAve(ave);
+    }
 	//    jackPot.aveErr(ave,err);
         for(int ixyz = 0;ixyz<DataSize;ixyz++){cout<<"ave "<<ixyz<<" "<<ave[ixyz]<<" err "<<err[ixyz]<<endl;}
 	inPot.outErr(xdata,ave,err,outPath,outStaticsInfo,physInfo,binnumber,iT,DataSize);
-	delete [] err;
-	delete [] ave;
+
   }//It
-  delete [] xdata;
+    delete [] err;
+    delete [] ave;
+    delete [] xdata;
 cout <<"@End all jobs"<<endl; 
 return 0;
 }
