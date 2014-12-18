@@ -46,16 +46,17 @@ bool outBinary = false;
 
 int main(){
 
-
-    
   IODATA inPot;
   inPot.setReadBinaryMode(inBinary);
   inPot.setWriteBinaryMode(outBinary);
   inPot.setConfSize(Confsize);
 
   double* xdata = new double[DataSize]();
-    double* err= new double[DataSize]; 
-    double* ave= new double[DataSize]; 
+  double* err= new double[DataSize]();
+  double* ave= new double[DataSize]();
+  double* max = new double[DataSize]();
+  double* min = new double[DataSize]();
+  double* BinData = new double[DataSize * binnumber]();
 
   for(int ix =0; ix<XnodeSites; ix++){
     for(int iy =0; iy<YnodeSites; iy++){
@@ -64,31 +65,45 @@ int main(){
       }
     }
   }
-
+#undef min
+#undef radius
   for(int iT=T_in  ; iT< T_fi +1  ; iT++ ){
     {
       JACK jackPot;
-    jackPot.set(Confsize, binsize, DataSize);
-    for (int iconf=0; iconf< Confsize; iconf++) {
+      jackPot.set(Confsize, binsize, DataSize);
+      for (int iconf=0; iconf< Confsize; iconf++) {
       COMPLEX* ydata = new COMPLEX[DataSize];
       inPot.callData(ydata,1,inPath,inStaticsInfo,physInfo,iconf,iT);
-	               if(iconf == 0){      for(int ixyz = 0;ixyz<DataSize;ixyz++){ cout<<iconf<<" "<<ixyz<<" "<<ydata[ixyz]<<endl;}}
+
+      //debug
+      //if(iconf == 0){      for(int ixyz = 0;ixyz<DataSize;ixyz++){ cout<<iconf<<" "<<ixyz<<" "<<ydata[ixyz]<<endl;}}
+      //printf("%d %1.16e\n", iconf, ydata[0].real());
+
       jackPot.setData(ydata,iconf);
       delete [] ydata;
+      }
+      jackPot.makeBinCalc(BinData);
+      jackPot.calcErr(err);
+      jackPot.calcAve(ave);
+      jackPot.percentileErrCalc(min, max,0.68);
     }
-    
+    //for (int b=0; b< binnumber; b++) {
+    //  printf("%d %1.16e\n", b, BinData[(0) + DataSize *(b)]);
+    //}
 
-        jackPot.calcErr(err);
-	jackPot.calcAve(ave);
+    //    jackPot.aveErr(ave,err);
+    for(int ixyz = 0;ixyz<DataSize;ixyz++){
+      printf("%1.16e %1.16e %1.16e %1.16e %1.16e\n",xdata[ixyz], ave[ixyz], err[ixyz], min[ixyz], max[ixyz]);
     }
-	//    jackPot.aveErr(ave,err);
-        for(int ixyz = 0;ixyz<DataSize;ixyz++){cout<<"ave "<<ixyz<<" "<<ave[ixyz]<<" err "<<err[ixyz]<<endl;}
-	inPot.outErr(xdata,ave,err,outPath,outStaticsInfo,physInfo,binnumber,iT,DataSize);
+    inPot.outErr(xdata,ave,err,outPath,outStaticsInfo,physInfo,binnumber,iT,DataSize);
 
   }//It
-    delete [] err;
-    delete [] ave;
-    delete [] xdata;
-cout <<"@End all jobs"<<endl; 
-return 0;
+  delete [] BinData;
+  delete [] min;
+  delete [] max;
+  delete [] err;
+  delete [] ave;
+  delete [] xdata;
+  cout <<"@End all jobs"<<endl;
+  return 0;
 }

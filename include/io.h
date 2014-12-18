@@ -31,7 +31,7 @@ void setWriteBinaryMode(bool swich);
 void setConfSize(int confSize);
 void setOutAve(bool swich);
 void setD(std::string dim);
-  
+
  private:
   template<typename DATA> int readData(DATA in ,char* inFileName);
   int readData(std::complex<double>* data ,char* inFileName);   //In text mode, complex<double> a.real() a.imag() <==can read ! ||| complex<double> (real,imag) <==type data can't read
@@ -42,8 +42,8 @@ void setD(std::string dim);
   template<typename DATA> int writeData1D(DATA xd, std::complex<double>* ave,std::complex<double>* err,char* outFileName);
     int writeData3D( std::complex<double>* ave,std::complex<double>* err,char* outFileName);
     void checkConfsize();
-    
-    
+
+
     bool r_bSwitch_;
     bool w_bSwitch_;
     bool wAveSwitch_;
@@ -78,7 +78,7 @@ void IODATA::setConfSize(int confSize){
   binnumber_ = confSize;
 }
 void IODATA::setOutAve(bool swich){
-  wAveSwitch_ = swich;  
+  wAveSwitch_ = swich;
 }
 void IODATA::setD(std::string flg_dim){
   flg_dim_ = flg_dim;
@@ -125,7 +125,7 @@ template<typename XDATA,typename DATA> void IODATA::outErr(XDATA ix, DATA out ,D
       std::cerr<<"ERROR should set Dimension setD(string 1D or 3D)"<<std::endl;
       exit(1);}
   }
-  
+
   else {
     std::cerr << "ERROR binary swich is warang::"<<std::endl;
     exit(1);
@@ -158,7 +158,7 @@ template<typename DATA> int IODATA::readData(DATA data ,char* inFileName){
     }
     infile.close();
   }
-  
+
   if(!r_bSwitch_){
     int id = 0;
     infile.open(inFileName,std::ios::in);
@@ -186,7 +186,7 @@ template<typename DATA> int IODATA::readData(DATA data ,char* inFileName){
       }
       id = id + 1;
     }
-    while ( !infile.eof() ); // important for all 0 file                                                                                                                                            
+    while ( !infile.eof() ); // important for all 0 file
     id = id -1;
     static int tmp = 0;
     if (tmp==0) {
@@ -223,7 +223,7 @@ int IODATA::readData(std::complex<double>* data ,char* inFileName){
     }
     infile.close();
   }
-  
+
   if(!r_bSwitch_){
     int id = 0;
     infile.open(inFileName,std::ios::in);
@@ -244,7 +244,7 @@ int IODATA::readData(std::complex<double>* data ,char* inFileName){
       for (int tmpid =0;tmpid <line_;tmpid++){
 	infile>>tmpdata;
       }
-      
+
       infile >> real >> imag;
       data[id] = std::complex< double >(real,imag);
       int iChar = 0;
@@ -255,7 +255,7 @@ int IODATA::readData(std::complex<double>* data ,char* inFileName){
       }
       id = id + 1;
     }
-    while ( !infile.eof() ); // important for all 0 file                                                                                                                                            
+    while ( !infile.eof() ); // important for all 0 file
     id = id -1;
     static int tmp = 0;
     if (tmp==0) {
@@ -324,7 +324,7 @@ int IODATA::writeData(std::complex<double>* data,char* outFileName)
     }
     for(int id = 0 ;id<dataSizeOut_;id++){
       ofs<<id<<" "<<data[id].real()<<" "<<data[id].imag()<<std::endl;
-      
+
     }
     ofs.close();}
   return 0;
@@ -343,7 +343,7 @@ template<typename XDATA ,typename DATA> int IODATA::writeData1D(XDATA xd ,DATA a
     exit(1);
     return EXIT_FAILURE;
   }
-    
+
   if(!w_bSwitch_){
     ofs.setf(std::ios::scientific);
     ofs.open(outFileName,std::ios::out);
@@ -353,8 +353,8 @@ template<typename XDATA ,typename DATA> int IODATA::writeData1D(XDATA xd ,DATA a
       return EXIT_FAILURE;
     }
     for(int id = 0; id<dataSizeOut_; id++){
-      ofs<<xd[id]<<" "<< ave[id]<<" "<<err[id]<<std::endl;	  	    
-    }     
+      ofs<<xd[id]<<" "<< ave[id]<<" "<<err[id]<<std::endl;
+    }
     ofs.close();
   }
   return 0;
@@ -378,7 +378,7 @@ template<typename DATA>int IODATA::writeData1D(DATA xd, std::complex<double>* av
       return EXIT_FAILURE;
     }
     for(int id = 0; id<dataSizeOut_; id++){
-      ofs<<xd[id]<<" "<< ave[id].real()<<" "<<err[id].real()<<std::endl;	  	    
+      ofs<<xd[id]<<" "<< ave[id].real()<<" "<<err[id].real()<<std::endl;
     }
     ofs.close();
   }
@@ -397,7 +397,7 @@ template<typename DATA> int IODATA::writeData3D(DATA ave,DATA err,char* outFileN
     exit(1);
     return EXIT_FAILURE;
   }
-    
+
   if(!w_bSwitch_){
     ofs.setf(std::ios::scientific);
     ofs.open(outFileName,std::ios::out);
@@ -414,7 +414,7 @@ template<typename DATA> int IODATA::writeData3D(DATA ave,DATA err,char* outFileN
     int Zsize = Xsize;
     int r_sq_max = radius_sq(Xsize,Ysize,Zsize);
     int r_sq = 0;
-    if(wAveSwitch_){	
+    if(wAveSwitch_){
     int* r_sq_count = new int[r_sq_max]();
     double* aveR = new double[r_sq_max]();
     double* errR = new double[r_sq_max]();
@@ -430,9 +430,9 @@ template<typename DATA> int IODATA::writeData3D(DATA ave,DATA err,char* outFileN
       }
     }
     for (int r_sq=0; r_sq<r_sq_max; r_sq++) {
-      
+
       if ( r_sq_count[r_sq] == 0 ) continue;
-      
+
       aveR[r_sq] =aveR[r_sq]/ ((double) r_sq_count[r_sq]);
       errR[r_sq] =errR[r_sq]/ ((double) r_sq_count[r_sq]);
       float rad = sqrt((float)r_sq);
@@ -448,12 +448,12 @@ template<typename DATA> int IODATA::writeData3D(DATA ave,DATA err,char* outFileN
 	  for(int ix = 0; ix<Xsize; ix++){
 	    int r_sq = radius_sq( min(ix,Xsize-ix), min(iy,Ysize-iy), min(iz,Zsize-iz) );
 	    float rad = (float)r_sq;
-	    ofs<<rad<<" "<< ave[(ix) +Xsize*((iy) + Ysize*((iz)))]<<" "<<err[(ix) +Xsize*((iy) + Ysize*((iz)))]<<std::endl;	  	    
+	    ofs<<rad<<" "<< ave[(ix) +Xsize*((iy) + Ysize*((iz)))]<<" "<<err[(ix) +Xsize*((iy) + Ysize*((iz)))]<<std::endl;
 	}
       }
-    } 
     }
-     
+    }
+
     ofs.close();
   }
   return 0;
@@ -485,7 +485,7 @@ int IODATA::writeData3D(std::complex<double>* ave,std::complex<double>* err,char
     int r_sq_max = radius_sq(Xsize,Ysize,Zsize);
     int r_sq = 0;
     if(wAveSwitch_)  {
-    
+
     int* r_sq_count = new int[r_sq_max]();
     double* aveR = new double[r_sq_max]();
     double* errR = new double[r_sq_max]();
@@ -501,9 +501,9 @@ int IODATA::writeData3D(std::complex<double>* ave,std::complex<double>* err,char
       }
     }
     for (int r_sq=0; r_sq<r_sq_max; r_sq++) {
-      
+
       if ( r_sq_count[r_sq] == 0 ) continue;
-      
+
       aveR[r_sq] =aveR[r_sq]/ ((double) r_sq_count[r_sq]);
       errR[r_sq] =errR[r_sq]/ ((double) r_sq_count[r_sq]);
       float rad = sqrt((float)r_sq);
@@ -519,15 +519,15 @@ int IODATA::writeData3D(std::complex<double>* ave,std::complex<double>* err,char
       for(int ix = 0; ix<Xsize; ix++){
 	int r_sq = radius_sq( min(ix,Xsize-ix), min(iy,Ysize-iy), min(iz,Zsize-iz) );
 	float rad = (float)r_sq;
-	ofs<<rad<<" "<< ave[(ix) +Xsize*((iy) + Ysize*((iz)))].real()<<" "<<err[(ix) +Xsize*((iy) + Ysize*((iz)))].real()<<std::endl;	  	    
+	ofs<<rad<<" "<< ave[(ix) +Xsize*((iy) + Ysize*((iz)))].real()<<" "<<err[(ix) +Xsize*((iy) + Ysize*((iz)))].real()<<std::endl;
       }
     }
   }
     }
-    
+
     ofs.close();
   }
   return 0;
 }
-
+#undef min
 #endif

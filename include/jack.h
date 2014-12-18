@@ -3,25 +3,31 @@
  * @File io.h
  * @brief data in out class (text and binary)
  * @ingroup YAMADA
- * @author  M.YAMADA 
+ * @author  M.YAMADA
  * @date    Thu Jun 13 22:10:03 2013
  */
 //--------------------------------------------------------------------------
 #ifndef JACK_CALC_YAMADA_20130613
 #define JACK_CALC_YAMADA_20130613
 
+
 #include<iostream>
 #include<complex>
 #include<memory.h>
+#include<vector>
+#include<algorithm>
 
 class JACK{
  public:
   JACK();
   ~JACK();
   void		set(int confSize, int binsize, int DataSize);
-  void	calcAve(double* );
-  void	calcErr(double* );
+  void	        calcAve(double* );
+  void	        calcErr(double* );
   void		aveErr(double* ave,double* err);
+  void          percentileErrCalc(double* errMin, double* errMax, const double percent ); //percent 0~1
+  void          makeBinCalc(double*);
+
 private:
   void		makeBin();
   void		jackAveCalc();
@@ -103,6 +109,11 @@ void JACK::aveErr(double* Ave, double* Err){
   calcAve(Ave);
   calcErr(Err);
 }
+void JACK::makeBinCalc(double* BinData_out)
+{
+  makeBin();
+  memcpy(BinData_out,BinData,sizeof(*BinData) * dataSize * binnumber);
+}
 template <typename DATA>     void JACK::setData(DATA in, int iconf){
   checkErr();
   double* tmp =new double[dataSize]();
@@ -163,7 +174,7 @@ void JACK::makeBin(){
 }
 void JACK::jackAveCalc(){
   for(int id = 0; id<dataSize; id++){
-    
+
     double	buffer = 0.0;
     for (int b=0; b<binnumber; b++) {
       buffer = buffer+binData(id,b);
@@ -192,6 +203,42 @@ void JACK::checkErr(){
       std::cout <<"ERR set jack info by using set(int confSize, int binsize, int DataSize); "<<std::endl;
     }
 }
+void JACK::percentileErrCalc(double* errMin, double* errMax, const double percent)
+{
+  if (percent < 0 || 1<percent)
+  {
+    std::cout <<"ERR percent should 0~1 percent = "<<percent <<std::endl;
+  }
+  if(!aveInit_) jackAveCalc();
 
+  int threshold = round(0.5 * (double)((binnumber - 1.0) * (1.0 - percent))); //cut down
+  double factor = sqrt((double)binnumber -1.0);
+
+  for(int id =0; id<dataSize; id++)
+  {
+    std::vector<double> binArray;
+    for(int b =0; b<binnumber; b++)
+    {
+      binArray.push_back(binData(id,b));
+    }
+    std::sort(binArray.begin(),binArray.end());
+    //debug
+    if(id ==0){
+      for (int b = 0 ; b < (int)binArray.size(); b++)
+      {
+        printf("%d %1.16e\n", b, binArray[b]);
+      }
+      printf("%d %1.16e\n",threshold, binArray[threshold]);
+      printf("%d %1.16e\n", binnumber -1 -threshold, binArray[binnumber -1 -threshold]);
+
+    //std::cout <<(threshold)<<"\t"<<binArray[threshold]<<std::endl;
+    //std::cout <<(binnumber - 1 - threshold)<<"\t"<<binArray[binnumber - threshold]<<std::endl;
+    //std::cout <<factor*(binArray[threshold] - ave_[id])<<std::endl;
+    //std::cout <<factor*(binArray[binnumber - 1 - threshold] - ave_[id])<<std::endl;
+    }
+    errMin[id] = factor*(binArray[threshold] - ave_[id]) + ave_[id];
+    errMax[id] = factor*(binArray[binnumber - 1 - threshold] - ave_[id]) + ave_[id];
+  }
+}
 
 #endif

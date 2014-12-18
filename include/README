@@ -1,5 +1,5 @@
 brief: calc jack knefie
-available data type: int array, float array, double array, complex<double> array, 
+available data type: int array, float array, double array, complex<double> array,
 but complex is only used real part
 
 データタイプは自動で合わせてくれる
@@ -12,12 +12,16 @@ confsize, binsize Datasizeの設定を行う。
 以下のメンバ関数を利用
 .set(confsie, binsize, datasize);  //デフォルトは全て0
 ・データの入力
-setData(std::complex<double>* in, int iconf)    //raw data  
+setData(std::complex<double>* in, int iconf)    //raw data
 void setBinData(std::complex<double>* in, int iconf);    //bin data
 ・計算を実行して結果の先頭ポインタを返す。
 calcAve(); //平均を計算 返り値はdouble*
 calcErr(); //エラーを計算 返り値はdouble*
-
+・パーセンタイルエラーを返す
+percentileErrCalc(min, max,0.68)
+0.68は1σ 省略すると1σ)
+・binの配列を返す
+makeBinCalc(BinData);
 ※ 入力はテンプレートを利用しているのでどんな型でも使用可能
 
 
