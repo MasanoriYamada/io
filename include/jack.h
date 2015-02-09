@@ -223,19 +223,19 @@ void JACK::percentileErrCalc(double* errMin, double* errMax, const double percen
     }
     std::sort(binArray.begin(),binArray.end());
     //debug
-    if(id ==0){
-      for (int b = 0 ; b < (int)binArray.size(); b++)
-      {
-        printf("%d %1.16e\n", b, binArray[b]);
-      }
-      printf("%d %1.16e\n",threshold, binArray[threshold]);
-      printf("%d %1.16e\n", binnumber -1 -threshold, binArray[binnumber -1 -threshold]);
+    //if(id ==0){
+    //  for (int b = 0 ; b < (int)binArray.size(); b++)
+    //  {
+    //    printf("%d %1.16e\n", b, binArray[b]);
+    //  }
+    //  printf("%d %1.16e\n",threshold, binArray[threshold]);
+    //  printf("%d %1.16e\n", binnumber -1 -threshold, binArray[binnumber -1 -threshold]);
 
     //std::cout <<(threshold)<<"\t"<<binArray[threshold]<<std::endl;
     //std::cout <<(binnumber - 1 - threshold)<<"\t"<<binArray[binnumber - threshold]<<std::endl;
     //std::cout <<factor*(binArray[threshold] - ave_[id])<<std::endl;
     //std::cout <<factor*(binArray[binnumber - 1 - threshold] - ave_[id])<<std::endl;
-    }
+    //}
     errMin[id] = factor*(binArray[threshold] - ave_[id]) + ave_[id];
     errMax[id] = factor*(binArray[binnumber - 1 - threshold] - ave_[id]) + ave_[id];
   }

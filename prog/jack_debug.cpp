@@ -85,7 +85,7 @@ int main(){
       jackPot.makeBinCalc(BinData);
       jackPot.calcErr(err);
       jackPot.calcAve(ave);
-      jackPot.percentileErrCalc(min, max,0.68);
+      jackPot.percentileErrCalc(min, max,0.5);
     }
     //for (int b=0; b< binnumber; b++) {
     //  printf("%d %1.16e\n", b, BinData[(0) + DataSize *(b)]);
